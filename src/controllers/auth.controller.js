@@ -1,57 +1,48 @@
 import { Apierror } from "../utils/Apierror.js";
-import { Apiresponse } from "../utils/Apiresponse.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
-import User from "../models/auth.model.js";
-import { OAuth2Client } from "google-auth-library";
+import { Apiresponse } from "../utils/Apiresponse.js";
+import { User } from "../models/auth.model.js";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const authcontroller = Asynchanler(async (req, res) => {
+
+const registerUser = Asynchanler(async (req, res) => {
     try {
-        const { idtoken } = req.body; // expecting from frontend / Postman
+        const { name, email, password, Branch, Year } = req.body;
+        console.log(name, email, password, Branch, Year);
 
-        if (!idtoken) {
-            throw new Apierror(404, "idtoken not found");
+        if (!name || !email || !password || !Branch || !Year) {
+            throw new Apierror(404, "all fileds are required");
         }
 
-        console.log("Received idtoken:", idtoken);
-
-        // Verify Google token
-        const ticket = await client.verifyIdToken({
-            idToken: idtoken, // lowercase in body, uppercase in Google lib
-            audience: process.env.GOOGLE_CLIENT_ID
+        const existUser = await User.findOne({
+            $or: [{ name }, { email }]
         });
-
-        const payload = ticket.getPayload();
-        const { sub: googleId, name, email, picture } = payload;
-
-        let user = await User.findOne({ googleId });
-        if (!user) {
-            user = await User.create({ googleId, name, email, picture });
+        if (existUser) {
+            throw new Apierror(409, "user alredy exist");
         }
 
-        const accesstoken = user.generateAccessToken();
+        const existUser1 = await User.create(
+            {
+                name: name.toLowerCase,
+                email: email.toLowerCase,
+                password,
+                Branch,
+                Year
 
-        res.status(200).json(
-            new Apiresponse(
-                200,
-                {
-                    user: {
-                        _id: user._id,
-                        googleId: user.googleId,
-                        name: user.name,
-                        email: user.email,
-                        picture: user.picture
-                    },
-                    accesstoken
-                },
-                "login successful"
-            )
+            }
         );
+        const finaluser = await User.findById(existUser1._id).select('-password -refreshToken');
+        if (!finaluser) {
+            throw new Apierror(409, "user alredy exits");
+        }
+        res.status(200).json
+            (
+                new Apiresponse(200, finaluser, "register succesfully")
+            )
     } catch (error) {
         console.log("error", error);
-        res.status(500).json(new Apierror(500, "Google auth failed"));
+
     }
 });
 
-export { authcontroller };
+export { registerUser };
