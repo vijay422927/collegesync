@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import logger from "../utils/logger";
 /*
 
 ...........database connection ...........
@@ -7,15 +8,20 @@ DB_NAME,DB_NAME from env
 
 
 */
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
-const connectdb=async () => {
-    try {
-        const connectionInstance=mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
-        console.log("monggose connected",(await connectionInstance).connection.name);
-        
-    } catch (error) {
-        console.log("Error",error);
-        process.exit(1);    }
+const connectdb = async () => {
+  try {
+    const connectionInstance = mongoose.connect(
+      `${process.env.DB_URL}/${process.env.DB_NAME}`
+    );
+    logger.info(
+      "monggose connected",
+      (await connectionInstance).connection.name
+    );
+  } catch (error) {
+    logger.warn("Error while connecting to the database", error);
+    process.exit(1);
+  }
 };
-export{connectdb};
+export { connectdb };
