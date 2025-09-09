@@ -2,47 +2,80 @@ import { Apierror } from "../utils/Apierror.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import { User } from "../models/auth.model.js";
-
-
+import { valid } from "joi";
+import validateRegistration from "../utils/validation.js";
+import logger from "../utils/logger.js";
 
 const registerUser = Asynchanler(async (req, res) => {
-    try {
-        const { name, email, password, Branch, Year } = req.body;
-        console.log(name, email, password, Branch, Year);
+  try {
+    const { name, email, password, Branch, Year } = req.body;
+    console.log(name, email, password, Branch, Year);
 
-        if (!name || !email || !password || !Branch || !Year) {
-            throw new Apierror(404, "all fileds are required");
-        }
-
-        const existUser = await User.findOne({
-            $or: [{ name }, { email }]
-        });
-        if (existUser) {
-            throw new Apierror(409, "user alredy exist");
-        }
-
-        const existUser1 = await User.create(
-            {
-                name: name.toLowerCase,
-                email: email.toLowerCase,
-                password,
-                Branch,
-                Year
-
-            }
-        );
-        const finaluser = await User.findById(existUser1._id).select('-password -refreshToken');
-        if (!finaluser) {
-            throw new Apierror(409, "user alredy exits");
-        }
-        res.status(200).json
-            (
-                new Apiresponse(200, finaluser, "register succesfully")
-            )
-    } catch (error) {
-        console.log("error", error);
-
+    if (!name || !email || !password || !Branch || !Year) {
+      throw new Apierror(404, "all fileds are required");
     }
+
+    const existUser = await User.findOne({
+      $or: [{ name }, { email }],
+    });
+    if (existUser) {
+      throw new Apierror(409, "user alredy exist");
+    }
+
+    const { error } = validateRegistration(req.body);
+    if (error) {
+      logger.warn("invalid input fields", error);
+      return res
+        .status(400)
+        .json(new Apiresponse(400, req.body, "invalid input fields"));
+    }
+    const existUser1 = await User.create({
+      name: name.toLowerCase,
+      email: email.toLowerCase,
+      password,
+      Branch,
+      Year,
+    });
+    const finaluser = await User.findById(existUser1._id).select(
+      "-password -refreshToken"
+    );
+    if (!finaluser) {
+      throw new Apierror(409, "user alredy exits");
+    }
+    res
+      .status(200)
+      .json(new Apiresponse(200, finaluser, "register succesfully"));
+  } catch (error) {
+    logger.warn("error while regisering the user", error);
+  }
 });
 
-export { registerUser };
+const loginUser = Asynchanler(async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    const isPasswordMatch = user.methods.isPasswordMatch(password);
+    if (!isPasswordMatch) {
+      logger.info("password is incorrect ");
+      return res
+        .status(400)
+        .json(new Apiresponse(400, password, "password is incorrect"));
+    }
+    const token = user.methods.generateAccessToken();
+    if (!token) {
+      logger.warn("token is not defined");
+    }
+    res
+      .status(200)
+      .json(new Apiresponse(200, token, "user is logined successfully"));
+  } catch (error) {
+    logger.warn("failed to login user ", error);
+    return res.status(400).json({
+      success: false,
+      message: "failed to login user ",
+    });
+  }
+});
+
+export { registerUser, loginUser };
