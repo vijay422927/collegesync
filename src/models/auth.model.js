@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
     branch: { type: String, required: true },
-    Year: { type: Number, required: true },
+    year: { type: Number, required: true },
     refreshToken: { type: String }, // optional
   },
   { timestamps: true }
@@ -33,7 +33,7 @@ userSchema.methods.generateAccessToken = async function () {
       _id: this._id,
       name: this.name,
       email: this.email,
-      Branch: this.Branch,
+      branch: this.Branch,
       Year: this.Year,
     },
     process.env.ACCESS_TOKEN_SECRET,

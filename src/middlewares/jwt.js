@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import logger from "../utils/logger.js";
 const verifyjwt = async (req, res, next) => {
   try {
-    logger.info("jwt middleware is triggered");
     const token = await req.headers.authorization?.split(" ")[1];
+    console.log(token);
+    
     if (!token) {
       throw new Apierror(404, "token not found");
     }

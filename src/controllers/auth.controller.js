@@ -2,8 +2,11 @@ import { Apierror } from "../utils/Apierror.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import { User } from "../models/auth.model.js";
+import { valid } from "joi";
 import validateRegistration from "../utils/validation.js";
 import logger from "../utils/logger.js";
+
+
 
 const registerUser = Asynchanler(async (req, res) => {
   try {
@@ -22,6 +25,8 @@ const registerUser = Asynchanler(async (req, res) => {
     }
 
     const { error } = validateRegistration(req.body);
+    console.log(error);
+
     if (error) {
       logger.warn("invalid input fields", error);
       return res
@@ -30,11 +35,11 @@ const registerUser = Asynchanler(async (req, res) => {
     }
     console.log("hi hello");
     const existUser1 = await User.create({
-      name: name.toLowerCase,
-      email: email.toLowerCase,
+      name: name.toLowerCase(),
+      email: email.toLowerCase(),
       password,
-      branch,
-      year,
+      Branch,
+      Year,
     });
     const finaluser = await User.findById(existUser1._id).select(
       "-password -refreshToken"
@@ -50,25 +55,53 @@ const registerUser = Asynchanler(async (req, res) => {
   }
 });
 
+
+
 const loginUser = Asynchanler(async (req, res) => {
-  const { username, password } = req.body;
+  const { name, password } = req.body;
+
+  console.log(name, password);
+
+
 
   try {
-    const user = await User.findOne({ username });
-    const isPasswordMatch = user.methods.isPasswordMatch(password);
+    const user = await User.findOne({ name });
+
+
+    //if not send a error message to user not registered..
+    if (!user) {
+      throw new Apierror(404, "user not found");
+
+    }
+
+    const isPasswordMatch = await user.isPasswordCorrect(password);
     if (!isPasswordMatch) {
       logger.info("password is incorrect ");
       return res
         .status(400)
         .json(new Apiresponse(400, password, "password is incorrect"));
     }
-    const token = user.methods.generateAccessToken();
+
+    const token = await user.generateAccessToken();
+    user.token = token;    // required for the logout
+
     if (!token) {
       logger.warn("token is not defined");
     }
     res
       .status(200)
-      .json(new Apiresponse(200, token, "user is logined successfully"));
+      .json(new Apiresponse(200,
+        {
+          user:                         // send name,email,_id with token
+          {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+
+          },
+          token
+        },
+        "user is logined successfully"));
   } catch (error) {
     logger.warn("failed to login user ", error);
     return res.status(400).json({
@@ -78,4 +111,39 @@ const loginUser = Asynchanler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser };
+
+
+
+
+const logout = Asynchanler(async (req, res) => {
+
+  try {
+
+    if (!req.user) {
+      throw new Apierror(401, "Unauthorized, please login first");
+    }
+
+    const user = req.user._id;
+    console.log(user);
+ 
+    const finaluser = await User.findById(user);
+
+    if (!finaluser) {
+      throw new Apierror(404, "you should login first");
+    }
+
+    finaluser.token = null;
+    await finaluser.save();
+    res.status(200)
+      .json(
+        new Apiresponse(200, "logout succesfully")
+      );
+
+  } catch (error) {
+    console.log("error", error);
+
+  }
+});
+
+
+export { registerUser, loginUser, logout };
