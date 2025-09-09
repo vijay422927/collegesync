@@ -2,16 +2,15 @@ import { Apierror } from "../utils/Apierror.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import { User } from "../models/auth.model.js";
-import { valid } from "joi";
 import validateRegistration from "../utils/validation.js";
 import logger from "../utils/logger.js";
 
 const registerUser = Asynchanler(async (req, res) => {
   try {
-    const { name, email, password, Branch, Year } = req.body;
-    console.log(name, email, password, Branch, Year);
+    const { name, email, password, branch, year } = req.body;
+    console.log(name, email, password, branch, year);
 
-    if (!name || !email || !password || !Branch || !Year) {
+    if (!name || !email || !password || !branch || !year) {
       throw new Apierror(404, "all fileds are required");
     }
 
@@ -29,12 +28,13 @@ const registerUser = Asynchanler(async (req, res) => {
         .status(400)
         .json(new Apiresponse(400, req.body, "invalid input fields"));
     }
+    console.log("hi hello");
     const existUser1 = await User.create({
       name: name.toLowerCase,
       email: email.toLowerCase,
       password,
-      Branch,
-      Year,
+      branch,
+      year,
     });
     const finaluser = await User.findById(existUser1._id).select(
       "-password -refreshToken"
