@@ -2,7 +2,6 @@ import { Apierror } from "../utils/Apierror.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import { User } from "../models/auth.model.js";
-import { valid } from "joi";
 import validateRegistration from "../utils/validation.js";
 import logger from "../utils/logger.js";
 
