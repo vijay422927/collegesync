@@ -72,7 +72,20 @@ const loginUser = Asynchanler(async (req, res) => {
         .status(400)
         .json(new Apiresponse(400, password, "password is incorrect"));
     }
-
+    if (!user.isLogin) {
+      // checking the user before the he logined already or not ,if he logined then we send error response without token so he can't redirect to the dashboard or what ever ... next
+      return res
+        .status(400)
+        .json(
+          new Apiresponse(
+            400,
+            undefined,
+            "user is logined already in another device"
+          )
+        );
+    }
+    user.isLogin = true; // in this step toggle the islogin property
+    await user.save();
     const token = await user.generateAccessToken();
     user.token = token; // required for the logout
 
@@ -118,7 +131,7 @@ const logout = Asynchanler(async (req, res) => {
       throw new Apierror(404, "you should login first");
     }
 
-    finaluser.token = null;
+    finaluser.isLogin = false;
     await finaluser.save();
     res.status(200).json(new Apiresponse(200, "logout succesfully"));
   } catch (error) {
@@ -126,32 +139,28 @@ const logout = Asynchanler(async (req, res) => {
   }
 });
 
-
-const forgotpassword=Asynchanler(async (req,res) => {
-  const{email,newpassword,confirmpassword}=req.body;
-
-  if(!email || !newpassword ||!confirmpassword)
-  {
-    throw new Apierror(404,"all  fields are required");
+const forgotpassword = Asynchanler(async (req, res) => {
+  const { email } = req.body; // for forgot password we take the email when the user is entered . to the email address we send a mail to the user with resetPassword token as params
+  if (!email) {
+    throw new Apierror(404, "all  fields are required");
   }
-  if(newpassword!=confirmpassword)
-  {
-    throw new Apierror(409,"password must be same");
-  }
+  // if (newpassword != confirmpassword) {
+  //   throw new Apierror(409, "password must be same");
+  // }
 
-  const user=await User.findOne({email});
-  if(!user)
-  {
-    throw new Apierror(404,"email is notregistered");
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Apierror(404, "email is notregistered");
   }
 
-   user.password=newpassword;
-   await user.save();
+  // user.password = newpassword;
+  // await user.save();
 
-   res.status(200)
-   .json(
-    new Apiresponse(200,"password changed succesfully")
-   );
-
+  res.status(200).json(new Apiresponse(200, "password changed succesfully"));
 });
-export { registerUser, loginUser, logout ,forgotpassword};
+
+const changePassword = Asynchanler(async (req, res) => {
+  // change password controller
+  const { newPassword } = req.body;
+});
+export { registerUser, loginUser, logout, forgotpassword, changePassword };

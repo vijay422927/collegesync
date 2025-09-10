@@ -9,7 +9,13 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     branch: { type: String, required: true },
     year: { type: Number, required: true },
-    refreshToken: { type: String }, // optional
+    resetPasswordToken: { type: String },
+    refreshTOken: { type: String }, // optional
+    isLogin: {
+      type: Boolean,
+      default: false,
+    },
+    resetPasswordExpire: Date,
   },
   { timestamps: true }
 );
@@ -48,5 +54,14 @@ userSchema.methods.generateRefreshToken = async function () {
   });
 };
 
+userSchema.methods.generateResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  thia.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
 const User = mongoose.model("User", userSchema);
 export { User };
