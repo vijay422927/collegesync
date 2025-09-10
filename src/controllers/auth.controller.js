@@ -159,8 +159,27 @@ const forgotpassword = Asynchanler(async (req, res) => {
   res.status(200).json(new Apiresponse(200, "password changed succesfully"));
 });
 
+const resetPassword = Asynchanler(async (req, res) => {
+  // reset password controller
+});
+
 const changePassword = Asynchanler(async (req, res) => {
   // change password controller
   const { newPassword } = req.body;
+  const existedUser = await User.findOne({ email: req.user.email });
+  if (!existedUser) {
+    return res
+      .status(400)
+      .json(Apiresponse(400, existedUser, "unable to change the password"));
+  }
+  existedUser.password = newPassword;
+  existedUser.save();
 });
-export { registerUser, loginUser, logout, forgotpassword, changePassword };
+export {
+  registerUser,
+  loginUser,
+  logout,
+  forgotpassword,
+  changePassword,
+  resetPassword,
+};
