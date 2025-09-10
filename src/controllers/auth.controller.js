@@ -126,4 +126,32 @@ const logout = Asynchanler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logout };
+
+const forgotpassword=Asynchanler(async (req,res) => {
+  const{email,newpassword,confirmpassword}=req.body;
+
+  if(!email || !newpassword ||!confirmpassword)
+  {
+    throw new Apierror(404,"all  fields are required");
+  }
+  if(newpassword!=confirmpassword)
+  {
+    throw new Apierror(409,"password must be same");
+  }
+
+  const user=await User.findOne({email});
+  if(!user)
+  {
+    throw new Apierror(404,"email is notregistered");
+  }
+
+   user.password=newpassword;
+   await user.save();
+
+   res.status(200)
+   .json(
+    new Apiresponse(200,"password changed succesfully")
+   );
+
+});
+export { registerUser, loginUser, logout ,forgotpassword};
