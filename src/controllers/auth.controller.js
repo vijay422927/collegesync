@@ -8,7 +8,7 @@ import logger from "../utils/logger.js";
 import { application } from "express";
 
 
-
+// register:http://localhost:3800/api/v1/users/register
 const registerUser = Asynchanler(async (req, res) => {
   try {
     const { name, email, password, branch, year } = req.body;
@@ -57,7 +57,7 @@ const registerUser = Asynchanler(async (req, res) => {
 });
 
 
-
+// login:http://localhost:3800/api/v1/users/login
 const loginUser = Asynchanler(async (req, res) => {
   const { name, password } = req.body;
 
@@ -114,7 +114,7 @@ const loginUser = Asynchanler(async (req, res) => {
 
 
 
-
+// logout:http://localhost:3800/api/v1/users/logout
 
 const logout = Asynchanler(async (req, res) => {
 
@@ -146,7 +146,7 @@ const logout = Asynchanler(async (req, res) => {
   }
 });
 
-
+// forgot:http://localhost:3800/api/v1/users/fogot
 const forgotpassword=Asynchanler(async (req,res) => {
   const{email,newpassword,confirmpassword}=req.body;
 
