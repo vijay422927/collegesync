@@ -32,8 +32,8 @@ const registerUser = Asynchanler(async (req, res) => {
     }
     console.log("hi hello");
     const existUser1 = await User.create({
-      name: name.toLowerCase(),
-      email: email.toLowerCase(),
+      name: name.toLowerCase().trim(),
+      email: email.toLowerCase().trim(),
       password,
       branch,
       year,
@@ -58,22 +58,28 @@ const loginUser = Asynchanler(async (req, res) => {
   console.log(name, password);
 
   try {
-    const user = await User.findOne({ name });
+    console.log("this in try catch", name, password);
+
+    const user = await User.findOne({ name: name.toLowerCase().trim() });
 
     //if not send a error message to user not registered..
+    console.log(user);
     if (!user) {
       throw new Apierror(404, "user not found");
     }
-
+    console.log("hi hello");
     const isPasswordMatch = await user.isPasswordCorrect(password);
+
     if (!isPasswordMatch) {
       logger.info("password is incorrect ");
       return res
         .status(400)
         .json(new Apiresponse(400, password, "password is incorrect"));
     }
-    if (!user.isLogin) {
+    console.log("hi after password checkup");
+    if (user.isLogin) {
       // checking the user before the he logined already or not ,if he logined then we send error response without token so he can't redirect to the dashboard or what ever ... next
+      console.log("this login check");
       return res
         .status(400)
         .json(
