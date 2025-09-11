@@ -178,6 +178,12 @@ const changePassword = Asynchanler(async (req, res) => {
       .status(400)
       .json(Apiresponse(400, existedUser, "unable to change the password"));
   }
+  if (existedUser.password === newPassword) {
+    throw new Apierror(
+      400,
+      "you entering the old password enter the new password"
+    );
+  }
   existedUser.password = newPassword;
   existedUser.save();
 });
