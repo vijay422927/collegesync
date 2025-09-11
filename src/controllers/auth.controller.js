@@ -2,13 +2,12 @@ import { Apierror } from "../utils/Apierror.js";
 import { Asynchanler } from "../utils/Asynchhandler.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
 import { User } from "../models/auth.model.js";
-
 import validateRegistration from "../utils/validation.js";
 import logger from "../utils/logger.js";
 import { application } from "express";
 
 
-// register:http://localhost:3800/api/v1/users/register
+
 const registerUser = Asynchanler(async (req, res) => {
   try {
     const { name, email, password, branch, year } = req.body;
@@ -34,13 +33,13 @@ const registerUser = Asynchanler(async (req, res) => {
         .status(400)
         .json(new Apiresponse(400, req.body, "invalid input fields"));
     }
+    console.log("hi hello");
     const existUser1 = await User.create({
-      name: name.toLowerCase(),
-      email: email.toLowerCase(),
+      name: name.toLowerCase().trim(),
+      email: email.toLowerCase().trim(),
       password,
       branch,
       year,
-
     });
     const finaluser = await User.findById(existUser1._id).select(
       "-password -refreshToken"
@@ -57,52 +56,68 @@ const registerUser = Asynchanler(async (req, res) => {
 });
 
 
-// login:http://localhost:3800/api/v1/users/login
+
 const loginUser = Asynchanler(async (req, res) => {
   const { name, password } = req.body;
 
   console.log(name, password);
 
-
-
   try {
-    const user = await User.findOne({ name });
+    console.log("this in try catch", name, password);
 
+    const user = await User.findOne({ name: name.toLowerCase().trim() });
 
     //if not send a error message to user not registered..
+    console.log(user);
     if (!user) {
       throw new Apierror(404, "user not found");
-
     }
-
+    console.log("hi hello");
     const isPasswordMatch = await user.isPasswordCorrect(password);
+
     if (!isPasswordMatch) {
       logger.info("password is incorrect ");
       return res
         .status(400)
         .json(new Apiresponse(400, password, "password is incorrect"));
     }
-
+    console.log("hi after password checkup");
+    if (user.isLogin) {
+      // checking the user before the he logined already or not ,if he logined then we send error response without token so he can't redirect to the dashboard or what ever ... next
+      console.log("this login check");
+      return res
+        .status(400)
+        .json(
+          new Apiresponse(
+            400,
+            undefined,
+            "user is logined already in another device"
+          )
+        );
+    }
+    user.isLogin = true; // in this step toggle the islogin property
+    await user.save();
     const token = await user.generateAccessToken();
-    user.token = token;    // required for the logout
+    user.token = token; // required for the logout
 
     if (!token) {
       logger.warn("token is not defined");
     }
-    res
-      .status(200)
-      .json(new Apiresponse(200,
+    res.status(200).json(
+      new Apiresponse(
+        200,
         {
-          user:                         // send name,email,_id with token
-          {
+          // send name,email,_id with token
+          user: {
             _id: user._id,
             name: user.name,
             email: user.email,
-
           },
-          token
+          token,
         },
-        "user is logined successfully"));
+        "user is logined successfully"
+      )
+    );
   } catch (error) {
     logger.warn("failed to login user ", error);
     return res.status(400).json({
@@ -114,39 +129,32 @@ const loginUser = Asynchanler(async (req, res) => {
 
 
 
-// logout:http://localhost:3800/api/v1/users/logout
+
 
 const logout = Asynchanler(async (req, res) => {
-
   try {
-
     if (!req.user) {
       throw new Apierror(401, "Unauthorized, please login first");
     }
 
     const user = req.user._id;
     console.log(user);
- 
+
     const finaluser = await User.findById(user);
 
     if (!finaluser) {
       throw new Apierror(404, "you should login first");
     }
 
-    finaluser.token = null;
+    finaluser.isLogin = false;
     await finaluser.save();
-    res.status(200)
-      .json(
-        new Apiresponse(200, "logout succesfully")
-      );
-
+    res.status(200).json(new Apiresponse(200, "logout succesfully"));
   } catch (error) {
     console.log("error", error);
-
   }
 });
 
-// forgot:http://localhost:3800/api/v1/users/fogot
+
 const forgotpassword=Asynchanler(async (req,res) => {
   const{email,newpassword,confirmpassword}=req.body;
 
@@ -154,24 +162,48 @@ const forgotpassword=Asynchanler(async (req,res) => {
   {
     throw new Apierror(404,"all  fields are required");
   }
-  if(newpassword!=confirmpassword)
-  {
-    throw new Apierror(409,"password must be same");
+  // if (newpassword != confirmpassword) {
+  //   throw new Apierror(409, "password must be same");
+  // }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Apierror(404, "email is notregistered");
   }
 
-  const user=await User.findOne({email});
-  if(!user)
-  {
-    throw new Apierror(404,"email is notregistered");
-  }
+  // user.password = newpassword;
+  // await user.save();
 
-   user.password=newpassword;
-   await user.save();
-
-   res.status(200)
-   .json(
-    new Apiresponse(200,"password changed succesfully")
-   );
-
+  res.status(200).json(new Apiresponse(200, "password changed succesfully"));
 });
-export { registerUser, loginUser, logout ,forgotpassword};
+
+const resetPassword = Asynchanler(async (req, res) => {
+  // reset password controller
+});
+
+const changePassword = Asynchanler(async (req, res) => {
+  // change password controller
+  const { newPassword } = req.body;
+  const existedUser = await User.findOne({ email: req.user.email });
+  if (!existedUser) {
+    return res
+      .status(400)
+      .json(Apiresponse(400, existedUser, "unable to change the password"));
+  }
+  if (existedUser.password === newPassword) {
+    throw new Apierror(
+      400,
+      "you entering the old password enter the new password"
+    );
+  }
+  existedUser.password = newPassword;
+  existedUser.save();
+});
+export {
+  registerUser,
+  loginUser,
+  logout,
+  forgotpassword,
+  changePassword,
+  resetPassword,
+};
