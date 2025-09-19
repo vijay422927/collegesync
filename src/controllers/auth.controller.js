@@ -17,6 +17,9 @@ const registerUser = Asynchanler(async (req, res) => {
       throw new Apierror(404, "all fileds are required");
     }
 
+
+
+    
     const existUser = await User.findOne({
       $or: [{ name }, { email }],
     });
@@ -81,21 +84,23 @@ const loginUser = Asynchanler(async (req, res) => {
         .status(400)
         .json(new Apiresponse(400, password, "password is incorrect"));
     }
-    console.log("hi after password checkup");
-    if (user.isLogin) {
-      // checking the user before the he logined already or not ,if he logined then we send error response without token so he can't redirect to the dashboard or what ever ... next
-      console.log("this login check");
-      return res
-        .status(400)
-        .json(
-          new Apiresponse(
-            400,
-            undefined,
-            "user is logined already in another device"
-          )
-        );
-    }
-    user.isLogin = true; // in this step toggle the islogin property
+    // console.log("hi after password checkup");
+    // if (user.isLogin) {
+    //   // checking the user before the he logined already or not ,if he logined then we send error response without token so he can't redirect to the dashboard or what ever ... next
+    //   console.log("this login 
+    // check");
+    //   return res
+    //     .status(400)
+    //     .json(
+    //       new Apiresponse(
+    //         400,
+    //         undefined,
+    //         "user is logined already in another device"
+    //       )
+    //     );
+    // }
+    // 
+     // in this step toggle the islogin property
     await user.save();
     const token = await user.generateAccessToken();
     user.token = token; // required for the logout
