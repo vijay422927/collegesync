@@ -1,68 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CollegeSync - Home</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CollegeSync | Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+    body { margin: 0; padding: 0; background: #000; color: #fff; }
+    a { text-decoration: none; }
+
+    /* Navbar */
     .navbar {
-      background-color: #004080;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background: #111;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+        position: sticky; top: 0; z-index: 100;
     }
-    .navbar-brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: white !important;
+    .logo { font-size: 24px; font-weight: bold; color: #00e5ff; cursor: pointer; }
+    .nav-buttons button {
+        background: linear-gradient(90deg, #00e5ff, #00bfa5);
+        border: none; padding: 10px 20px; margin-left: 15px; border-radius: 8px;
+        color: #121212; font-weight: bold; cursor: pointer; transition: 0.3s;
     }
-    .nav-link {
-      color: white !important;
-      font-weight: 500;
+    .nav-buttons button:hover { background: linear-gradient(90deg, #00bfa5, #00e5ff); transform: scale(1.05); }
+
+    /* Hero Section */
+    .hero { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 100px 20px; }
+    .hero h1 { font-size: 48px; color: #00e5ff; margin-bottom: 20px; }
+    .hero p { font-size: 20px; color: #aaa; margin-bottom: 40px; }
+    .hero button { padding: 15px 30px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; background: linear-gradient(90deg, #00e5ff, #00bfa5); color: #121212; font-weight: bold; transition: 0.3s; }
+    .hero button:hover { background: linear-gradient(90deg, #00bfa5, #00e5ff); transform: scale(1.05); }
+
+    /* Feature Cards */
+    .features { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; padding: 60px 20px; }
+    .card { background: #1a1a1a; width: 250px; height: 200px; perspective: 1000px; cursor: pointer; }
+    .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
+    .card:hover .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
+    .card-front { background: #222; }
+    .card-front h3 { color: #00e5ff; }
+    .card-back { background: #00e5ff; color: #121212; transform: rotateY(180deg); }
+
+    /* Carousel Section */
+    .carousel-container { max-width: 900px; margin: 50px auto; overflow: hidden; border-radius: 15px; background: #111; padding: 20px; }
+    .carousel { display: flex; transition: transform 0.5s ease-in-out; }
+    .carousel-item { min-width: 100%; text-align: center; padding: 40px 20px; }
+    .carousel-item h3 { color: #00e5ff; margin-bottom: 15px; }
+    .carousel-item p { color: #aaa; }
+    .carousel-buttons { text-align: center; margin-top: 15px; }
+    .carousel-buttons button { background: #00e5ff; border: none; margin: 0 5px; width: 12px; height: 12px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+    .carousel-buttons button.active { background: #00bfa5; }
+
+    /* Footer */
+    footer { text-align: center; padding: 20px; background: #111; color: #555; }
+
+    @media (max-width: 768px) {
+        .features { flex-direction: column; align-items: center; }
+        .hero h1 { font-size: 36px; }
+        .hero p { font-size: 18px; }
     }
-    .carousel-item img {
-      height: 90vh;
-      object-fit: cover;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg px-4">
-    <a class="navbar-brand" href="#">CollegeSync</a>
-    <div class="ms-auto">
-      <a href="login.html" class="btn btn-light me-2">Login</a>
-      <a href="register.html" class="btn btn-warning">Register</a>
-    </div>
-  </nav>
 
-  <!-- Carousel -->
-  <div id="studyCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f" class="d-block w-100" alt="Library Study">
-      </div>
-      <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b" class="d-block w-100" alt="Books">
-      </div>
-      <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7" class="d-block w-100" alt="Classroom">
-      </div>
-      <div class="carousel-item">
-        <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" class="d-block w-100" alt="Technology Learning">
-      </div>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">🎓 CollegeSync</div>
+        <div class="nav-buttons">
+            <button onclick="window.location.href='timetable.html'">Timetable</button>
+            <button onclick="window.location.href='attendance.html'">Attendance</button>
+            <button onclick="window.location.href='register.html'">Register</button>
+        </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#studyCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#studyCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Welcome to CollegeSync</h1>
+        <p>Manage your timetable, attendance, and stay updated with college activities.</p>
+        <button onclick="window.location.href='login.html'">Get Started</button>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="features">
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front"><h3>Find Courses</h3></div>
+                <div class="card-back"><p>Explore available courses and plan your semester efficiently.</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front"><h3>Join Clubs</h3></div>
+                <div class="card-back"><p>Participate in clubs and events to enhance your college experience.</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front"><h3>College Events</h3></div>
+                <div class="card-back"><p>Stay updated with workshops, seminars, and other college events.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Section -->
+    <div class="carousel-container">
+        <div class="carousel" id="carousel">
+            <div class="carousel-item">
+                <h3>Study Resources</h3>
+                <p>Access notes, tutorials, and practice questions from various courses.</p>
+            </div>
+            <div class="carousel-item">
+                <h3>Exam Preparation</h3>
+                <p>Get tips, mock tests, and guides for exams to stay ahead.</p>
+            </div>
+            <div class="carousel-item">
+                <h3>Peer Collaboration</h3>
+                <p>Connect with classmates to discuss topics and assignments.</p>
+            </div>
+        </div>
+        <div class="carousel-buttons" id="carousel-buttons">
+            <button class="active"></button>
+            <button></button>
+            <button></button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2025 CollegeSync. All rights reserved.
+    </footer>
+
+    <script>
+        // Carousel functionality
+        const carousel = document.getElementById('carousel');
+        const buttons = document.querySelectorAll('#carousel-buttons button');
+        let currentIndex = 0;
+
+        function updateCarousel(index) {
+            carousel.style.transform = `translateX(-${index * 100}%)`;
+            buttons.forEach((btn,i) => btn.classList.toggle('active', i===index));
+        }
+
+        buttons.forEach((btn, i) => {
+            btn.addEventListener('click', () => { currentIndex = i; updateCarousel(i); });
+        });
+
+        setInterval(() => { currentIndex = (currentIndex + 1) % buttons.length; updateCarousel(currentIndex); }, 5000);
+    </script>
+
 </body>
 </html>

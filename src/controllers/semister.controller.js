@@ -20,17 +20,11 @@ const search_semister = Asynchanler(async (req, res) => {
 
         const result = semWise.map((sem) => ({
             sem: sem.semester,
-            subjects: sem.subjects.map((sub, index) => ({
-                index: `sub${index + 1}`,
+            subjects: sem.subjects.map((sub) => ({
+                
                 id: sub._id,
-                name: sub.subjectName,
-                branch: sub.branch,
-                year: sub.year,
-                oldpapers: sub.oldpapers,
-                cos: sub.cos,
-                cheatsheet: sub.cheatsheet,
-                notes: sub.notes,
-                videos: sub.videos
+                name: sub.subjectName
+               
             }))
         }));
 
@@ -46,12 +40,14 @@ const search_semister = Asynchanler(async (req, res) => {
 
 
 const sem_s = Asynchanler(async (req, res) => {
-    const { branch, year, semester} = req.body;
-    if (!branch || !year || !semester) {
+    const subjectId = req.query.id;
+    console.log(subjectId);
+    
+    if (!subjectId) {
         throw new Apierror(404, "all are rquired");
     }
 
-    const result = await Sem.find({ branch, year, semester });
+    const result = await Subject.findById(subjectId);
     if(!result)
     {
         throw new Apierror(404,"in db not found");

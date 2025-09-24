@@ -151,7 +151,7 @@ const logout = Asynchanler(async (req, res) => {
       throw new Apierror(404, "you should login first");
     }
 
-    finaluser.isLogin = false;
+    finaluser.token = null;
     await finaluser.save();
     res.status(200).json(new Apiresponse(200, "logout succesfully"));
   } catch (error) {
